@@ -18,8 +18,9 @@
 package info.guardianproject.netcipher.proxy;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;

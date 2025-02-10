@@ -20,7 +20,9 @@ package info.guardianproject.netcipher.client;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
+
 import info.guardianproject.netcipher.proxy.OrbotHelper;
 import org.json.JSONObject;
 

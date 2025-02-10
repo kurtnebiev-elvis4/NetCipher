@@ -20,10 +20,12 @@ package info.guardianproject.netcipher;
 import android.app.Application;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
+
 import info.guardianproject.netcipher.client.StrongBuilderBase;
 import info.guardianproject.netcipher.client.TlsOnlySocketFactory;
 import info.guardianproject.netcipher.proxy.NetCipherURLStreamHandlerFactory;

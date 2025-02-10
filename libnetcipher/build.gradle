@@ -1,16 +1,20 @@
+import com.android.builder.core.BuilderConstants
+
 apply plugin: 'com.android.library'
 
 dependencies {
-    implementation 'com.android.support:support-annotations:27.1.1'
+    implementation 'androidx.core:core:1.15.0'
+//    implementation 'com.android.support:support-annotations:28.0.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
-    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'junit:junit:4.13.2'
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '27.0.3'
+    compileSdk 35
+    buildToolsVersion '34.0.0'
+    namespace 'info.guardianproject.netcipher'
 
     sourceSets {
         main {
@@ -35,6 +39,9 @@ android {
     }
 
     defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 35
+
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         /*
           The Android Testing Support Library collects analytics to continuously improve the testing
@@ -71,9 +78,9 @@ android {
     }
 }
 
-android.libraryVariants.all { variant ->
+android.libraryVariants.configureEach { variant ->
     def name = variant.buildType.name
-    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
+    if (name.equals(BuilderConstants.DEBUG)) {
         return; // Skip debug builds.
     }
     def task = project.tasks.create "jar${name.capitalize()}", Jar
@@ -81,19 +88,19 @@ android.libraryVariants.all { variant ->
     task.from variant.javaCompile.destinationDir
     task.exclude('info/guardianproject/**/BuildConfig.**')
     artifacts.add('archives', task);
-    task.baseName = 'netcipher'
+    task.archiveBaseName.set('netcipher')
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-    baseName = 'netcipher'
+    archiveClassifier.set('sources')
+    archiveBaseName.set('netcipher')
 }
 
-task javadoc(type: Javadoc) {
+tasks.register('javadoc', Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
+    classpath += configurations.implementation
     options.addStringOption('notimestamp')
     android.libraryVariants.all { variant ->
         if (variant.name == 'release') {
@@ -104,10 +111,11 @@ task javadoc(type: Javadoc) {
     failOnError false
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
-    baseName = 'netcipher'
+    archiveBaseName.set('netcipher')
 }
 
 artifacts {
@@ -115,37 +123,39 @@ artifacts {
     archives sourcesJar
 }
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
-task createPom << {
-    pom {
-        project {
-            name 'NetCipher'
-            artifactId 'netcipher'
-            inceptionYear '2012'
-            url 'https://guardianproject.info/code/netcipher'
-            description 'NetCipher is a library for Android that provides multiple means to improve network security in mobile applications. It provides best practices TLS settings using the standard Android HTTP methods, HttpURLConnection and Apache HTTP Client, provides simple Tor integration, makes it easy to configure proxies for HTTP connections and `WebView` instances.'
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
+tasks.register('createPom') {
+    doLast {
+        pom {
+            project {
+                name 'NetCipher'
+                artifactId 'netcipher'
+                inceptionYear '2012'
+                url 'https://guardianproject.info/code/netcipher'
+                description 'NetCipher is a library for Android that provides multiple means to improve network security in mobile applications. It provides best practices TLS settings using the standard Android HTTP methods, HttpURLConnection and Apache HTTP Client, provides simple Tor integration, makes it easy to configure proxies for HTTP connections and `WebView` instances.'
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'guardianproject'
+                        name = 'Guardian Project'
+                        email = 'support@guardianproject.info'
+                    }
+                }
+                issueManagement {
+                    url = "https://gitlab.com/guardianproject/netcipher/issues"
+                }
+                scm {
+                    connection = 'scm:git:https://gitlab.com/guardianproject/netcipher.git'
+                    url = 'https://gitlab.com/guardianproject/netcipher'
                 }
             }
-            developers {
-                developer {
-                    id = 'guardianproject'
-                    name = 'Guardian Project'
-                    email = 'support@guardianproject.info'
-                }
-            }
-            issueManagement {
-                url = "https://gitlab.com/guardianproject/netcipher/issues"
-            }
-            scm {
-                connection = 'scm:git:https://gitlab.com/guardianproject/netcipher.git'
-                url = 'https://gitlab.com/guardianproject/netcipher'
-            }
-        }
-    }.writeTo(project.getBuildDir().toString() + "/libs/" + "netcipher" + "-" + project.version + ".pom")
+        }.writeTo(project.getBuildDir().toString() + "/libs/" + "netcipher" + "-" + project.version + ".pom")
+    }
 }

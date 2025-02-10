@@ -28,9 +28,11 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -592,8 +594,8 @@ public class OrbotHelper implements ProxyHelper {
         if (orbot != null) {
             isInstalled = true;
             handler.postDelayed(onStatusTimeout, statusTimeoutMs);
-            context.registerReceiver(orbotStatusReceiver,
-                    new IntentFilter(OrbotHelper.ACTION_STATUS));
+            ContextCompat.registerReceiver(context, orbotStatusReceiver,
+                    new IntentFilter(OrbotHelper.ACTION_STATUS), ContextCompat.RECEIVER_EXPORTED);
             context.sendBroadcast(orbot);
         } else {
             isInstalled = false;
@@ -635,7 +637,7 @@ public class OrbotHelper implements ProxyHelper {
 
         filter.addDataScheme("package");
 
-        context.registerReceiver(orbotInstallReceiver, filter);
+        ContextCompat.registerReceiver(context, orbotInstallReceiver, filter, ContextCompat.RECEIVER_EXPORTED);
         host.startActivity(OrbotHelper.getOrbotInstallIntent(context));
     }
 
